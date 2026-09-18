@@ -137,7 +137,7 @@ export async function GET(
         ref_number: quotation ? `${quotation.quotation_number} (Rev ${quotation.revision_number})` : 'N/A',
         date: quotation?.quotation_date || null,
         link: quotation ? `/quotations/${quotation.id}` : null,
-        details: quotation ? `Quoted amount $${quotation.total_amount.toFixed(2)}` : 'No formal quote'
+        details: quotation ? `Quoted amount ₹${quotation.total_amount.toFixed(2)}` : 'No formal quote'
       },
       {
         stage_name: 'Sales Order Confirmation',

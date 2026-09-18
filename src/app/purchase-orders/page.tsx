@@ -56,7 +56,7 @@ export default function PurchaseOrdersPage() {
                     </td>
                     <td>{po.supplier?.name}</td>
                     <td>{new Date(po.po_date).toLocaleDateString()}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 600 }}>${po.total_amount?.toFixed(2)}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{po.total_amount?.toFixed(2)}</td>
                     <td style={{ textAlign: 'right', fontWeight: 600, color: pending > 0 ? 'var(--warning-color)' : 'var(--success-color)' }}>
                       {pending.toFixed(2)}
                     </td>

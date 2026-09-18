@@ -68,7 +68,7 @@ export default function ItemsPage() {
                 <tr key={i.id}>
                   <td><strong>{i.name}</strong></td>
                   <td>{i.uom}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 600 }}>{i.default_rate !== null ? `$${i.default_rate.toFixed(2)}` : '-'}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 600 }}>{i.default_rate !== null ? `₹${i.default_rate.toFixed(2)}` : '-'}</td>
                 </tr>
               ))
             )}
@@ -103,7 +103,7 @@ export default function ItemsPage() {
                 />
               </div>
               <div className="form-group">
-                <label>Default Rate ($)</label>
+                <label>Default Rate (₹)</label>
                 <input
                   type="number"
                   step="0.01"

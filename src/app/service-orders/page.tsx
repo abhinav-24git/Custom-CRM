@@ -61,7 +61,7 @@ export default function ServiceOrdersPage() {
                   <td style={{ textAlign: 'right', fontWeight: 600 }}>{so.ordered_qty}</td>
                   <td style={{ textAlign: 'right', fontWeight: 600 }}>{so.total_sent_rgp}</td>
                   <td style={{ textAlign: 'right', color: 'var(--success-color)', fontWeight: 600 }}>{so.total_accepted_return}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 600 }}>${so.amount.toFixed(2)}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{so.amount.toFixed(2)}</td>
                   <td>
                     <StatusBadge status={so.status} />
                   </td>

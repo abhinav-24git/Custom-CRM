@@ -138,11 +138,11 @@ export default function ServiceOrderDetailPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>Job Work Rate:</span>
-            <div style={{ fontWeight: 600 }}>${so.rate.toFixed(2)} / unit</div>
+            <div style={{ fontWeight: 600 }}>₹{so.rate.toFixed(2)} / unit</div>
           </div>
           <div>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>Total Contract Value:</span>
-            <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>${so.amount.toFixed(2)}</div>
+            <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>₹{so.amount.toFixed(2)}</div>
           </div>
           <div>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>Expected Completion:</span>

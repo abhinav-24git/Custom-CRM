@@ -108,7 +108,7 @@ export default function SalesOrderDetailPage() {
             {order.is_confirmed && <span className="badge" style={{ background: 'var(--success-color)' }}>Confirmed</span>}
             <span className={getStatusBadge(order.status)}>{order.status}</span>
           </div>
-          <h2 style={{ color: 'var(--primary-color)' }}>${order.total_amount.toFixed(2)}</h2>
+          <h2 style={{ color: 'var(--primary-color)' }}>₹{order.total_amount.toFixed(2)}</h2>
         </div>
       </div>
 

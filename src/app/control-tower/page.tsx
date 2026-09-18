@@ -85,7 +85,7 @@ export default function ControlTowerSearchPage() {
                     <td>
                       <StatusBadge status={o.status} />
                     </td>
-                    <td style={{ textAlign: 'right', fontWeight: 600 }}>${o.total_amount.toFixed(2)}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{o.total_amount.toFixed(2)}</td>
                     <td style={{ textAlign: 'right' }}>{ordered}</td>
                     <td style={{ textAlign: 'right', color: 'var(--success-color)', fontWeight: 600 }}>{dispatched}</td>
                     <td style={{ textAlign: 'center' }}>

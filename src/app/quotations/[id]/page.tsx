@@ -52,7 +52,7 @@ export default function QuotationDetailPage() {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ marginBottom: '0.5rem' }}><span className="badge badge-open">{q.status}</span></div>
-          <h2 style={{ color: 'var(--primary-color)' }}>${q.total_amount.toFixed(2)}</h2>
+          <h2 style={{ color: 'var(--primary-color)' }}>₹{q.total_amount.toFixed(2)}</h2>
         </div>
       </div>
 
@@ -100,9 +100,9 @@ export default function QuotationDetailPage() {
               <tr key={line.id}>
                 <td>{line.item?.name}</td>
                 <td style={{ textAlign: 'right' }}>{line.qty}</td>
-                <td style={{ textAlign: 'right' }}>${line.rate.toFixed(2)}</td>
-                <td style={{ textAlign: 'right' }}>${line.discount.toFixed(2)}</td>
-                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>${line.amount.toFixed(2)}</td>
+                <td style={{ textAlign: 'right' }}>₹{line.rate.toFixed(2)}</td>
+                <td style={{ textAlign: 'right' }}>₹{line.discount.toFixed(2)}</td>
+                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>₹{line.amount.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
@@ -121,7 +121,7 @@ export default function QuotationDetailPage() {
                     <td>Rev {rev.revision_number} {rev.is_latest_revision ? '(Current)' : ''}</td>
                     <td>{new Date(rev.createdAt).toLocaleString()}</td>
                     <td>{rev.status}</td>
-                    <td>${rev.total_amount.toFixed(2)}</td>
+                    <td>₹{rev.total_amount.toFixed(2)}</td>
                     <td>
                       {!rev.is_latest_revision && <Link href={`/quotations/${rev.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem' }}>View</Link>}
                     </td>

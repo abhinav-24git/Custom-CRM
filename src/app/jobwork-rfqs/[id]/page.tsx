@@ -273,8 +273,8 @@ export default function JobWorkRFQDetailPage() {
                       <strong>{quote.supplier?.name}</strong>
                       {quote.supplier?.phone && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{quote.supplier.phone}</div>}
                     </td>
-                    <td style={{ textAlign: 'right', fontWeight: 600 }}>${quote.rate.toFixed(2)}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--primary-color)' }}>${quote.amount.toFixed(2)}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{quote.rate.toFixed(2)}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--primary-color)' }}>₹{quote.amount.toFixed(2)}</td>
                     <td style={{ textAlign: 'right' }}>{quote.lead_time_days ? `${quote.lead_time_days} days` : 'N/A'}</td>
                     <td>{new Date(quote.quote_date).toLocaleDateString()}</td>
                     <td>
@@ -366,7 +366,7 @@ export default function JobWorkRFQDetailPage() {
 
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Rate / Unit ($) *</label>
+                  <label>Rate / Unit (₹) *</label>
                   <input
                     type="number"
                     step="any"

@@ -54,7 +54,7 @@ export default function SingleOrderControlTowerPage() {
             </span>
           </div>
           <p style={{ color: 'var(--text-secondary)' }}>
-            Customer: <strong>{sales_order.customer_name}</strong> • Ordered On: {new Date(sales_order.order_date).toLocaleDateString()} • Value: <strong>${sales_order.total_amount.toFixed(2)}</strong>
+            Customer: <strong>{sales_order.customer_name}</strong> • Ordered On: {new Date(sales_order.order_date).toLocaleDateString()} • Value: <strong>₹{sales_order.total_amount.toFixed(2)}</strong>
           </p>
         </div>
 

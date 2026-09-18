@@ -53,7 +53,7 @@ export default function QuotationsPage() {
                   </td>
                   <td>{new Date(q.quotation_date).toLocaleDateString()}</td>
                   <td>{q.customer?.name}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 600 }}>${q.total_amount?.toFixed(2)}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{q.total_amount?.toFixed(2)}</td>
                   <td>
                     <StatusBadge status={q.status} />
                   </td>

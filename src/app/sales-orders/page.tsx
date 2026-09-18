@@ -64,7 +64,7 @@ export default function SalesOrdersPage() {
                   </td>
                   <td>{o.customer?.name}</td>
                   <td>{new Date(o.order_date).toLocaleDateString()}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 600 }}>${o.total_amount?.toFixed(2)}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{o.total_amount?.toFixed(2)}</td>
                   <td>
                     <StatusBadge status={o.status} />
                   </td>

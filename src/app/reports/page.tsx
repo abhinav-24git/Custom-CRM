@@ -154,7 +154,7 @@ export default function ReportsPortalPage() {
                   label={key.replace(/_/g, ' ')}
                   value={
                     typeof val === 'number' && (key.includes('value') || key.includes('spend') || key.includes('revenue') || key.includes('amount'))
-                      ? `$${val.toLocaleString()}`
+                      ? `₹${val.toLocaleString()}`
                       : typeof val === 'number' && key.includes('pct')
                       ? `${val}%`
                       : val
@@ -227,7 +227,7 @@ export default function ReportsPortalPage() {
                       </td>
                       <td>{new Date(r.order_date).toLocaleDateString()}</td>
                       <td>{r.customer_name}</td>
-                      <td style={{ textAlign: 'right', fontWeight: 600 }}>${r.total_amount.toFixed(2)}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{r.total_amount.toFixed(2)}</td>
                       <td style={{ textAlign: 'right' }}>{r.total_ordered}</td>
                       <td style={{ textAlign: 'right', color: 'var(--success-color)', fontWeight: 600 }}>{r.total_dispatched}</td>
                       <td style={{ textAlign: 'right', color: r.total_balance > 0 ? 'var(--warning-color)' : 'var(--text-secondary)', fontWeight: 600 }}>{r.total_balance}</td>
@@ -267,7 +267,7 @@ export default function ReportsPortalPage() {
                       </td>
                       <td>{new Date(r.po_date).toLocaleDateString()}</td>
                       <td>{r.supplier_name}</td>
-                      <td style={{ textAlign: 'right', fontWeight: 600 }}>${r.total_amount.toFixed(2)}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 600 }}>₹{r.total_amount.toFixed(2)}</td>
                       <td style={{ textAlign: 'right' }}>{r.ordered_units}</td>
                       <td style={{ textAlign: 'right', color: 'var(--success-color)', fontWeight: 600 }}>{r.received_units}</td>
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>{r.pending_units}</td>
