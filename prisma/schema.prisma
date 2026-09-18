@@ -1,0 +1,615 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Customer {
+  id             String       @id @default(uuid())
+  name           String
+  contact_person String?
+  phone          String?
+  email          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  SalesOrders    SalesOrder[]
+  Enquiries      Enquiry[]
+  Quotations     Quotation[]
+  Feedbacks      Feedback[]
+}
+
+model Item {
+  id               String            @id @default(uuid())
+  name             String
+  uom              String
+  default_rate     Float?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  SalesOrderItems  SalesOrderItem[]
+  EnquiryItems     EnquiryItem[]
+  QuotationItems   QuotationItem[]
+}
+
+model Enquiry {
+  id             String        @id @default(uuid())
+  enquiry_number String        @unique
+  customer_id    String
+  customer       Customer      @relation(fields: [customer_id], references: [id])
+  enquiry_date   DateTime      @default(now())
+  source         String?
+  status         String        @default("New")
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  items          EnquiryItem[]
+  followups      Followup[]
+  quotations     Quotation[]
+}
+
+model EnquiryItem {
+  id            String    @id @default(uuid())
+  enquiry_id    String
+  enquiry       Enquiry   @relation(fields: [enquiry_id], references: [id])
+  item_id       String
+  item          Item      @relation(fields: [item_id], references: [id])
+  requested_qty Float
+  target_date   DateTime?
+  notes         String?
+}
+
+model Followup {
+  id                 String    @id @default(uuid())
+  enquiry_id         String
+  enquiry            Enquiry   @relation(fields: [enquiry_id], references: [id])
+  followup_date      DateTime
+  outcome            String
+  next_followup_date DateTime?
+  createdAt          DateTime  @default(now())
+}
+
+model Quotation {
+  id                 String          @id @default(uuid())
+  quotation_number   String
+  revision_number    Int             @default(0)
+  enquiry_id         String?
+  enquiry            Enquiry?        @relation(fields: [enquiry_id], references: [id])
+  customer_id        String
+  customer           Customer        @relation(fields: [customer_id], references: [id])
+  quotation_date     DateTime        @default(now())
+  validity_date      DateTime?
+  status             String          @default("Draft")
+  total_amount       Float           @default(0)
+  is_latest_revision Boolean         @default(true)
+  rejection_reason   String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  lines              QuotationItem[]
+  SalesOrders        SalesOrder[]
+}
+
+model QuotationItem {
+  id           String    @id @default(uuid())
+  quotation_id String
+  quotation    Quotation @relation(fields: [quotation_id], references: [id])
+  item_id      String
+  item         Item      @relation(fields: [item_id], references: [id])
+  qty          Float
+  rate         Float
+  discount     Float     @default(0)
+  amount       Float
+}
+
+model SalesOrder {
+  id                       String                @id @default(uuid())
+  so_number                String                @unique
+  quotation_id             String?
+  quotation                Quotation?            @relation(fields: [quotation_id], references: [id])
+  customer_id              String
+  customer                 Customer              @relation(fields: [customer_id], references: [id])
+  order_date               DateTime              @default(now())
+  status                   String                @default("Open")
+  total_amount             Float                 @default(0)
+  is_confirmed             Boolean               @default(false)
+  confirmed_at             DateTime?
+  customer_po_number       String?
+  delivery_commitment_date DateTime?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  lines                    SalesOrderItem[]
+  MaterialRequirements     MaterialRequirement[]
+  Dispatches               Dispatch[]
+}
+
+model SalesOrderItem {
+  id              String          @id @default(uuid())
+  sales_order_id  String
+  sales_order     SalesOrder      @relation(fields: [sales_order_id], references: [id])
+  item_id         String
+  item            Item            @relation(fields: [item_id], references: [id])
+  ordered_qty     Float
+  rate            Float
+  amount          Float
+  dispatched_qty  Float           @default(0)
+  cancelled_qty   Float           @default(0)
+  balance_qty     Float
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  dispatchEntries DispatchEntry[]
+  Plannings       Planning[]
+  QCInspections   QCInspection[]
+  DispatchItems   DispatchItem[]
+}
+
+model DispatchEntry {
+  id                  String         @id @default(uuid())
+  sales_order_item_id String
+  sales_order_item    SalesOrderItem @relation(fields: [sales_order_item_id], references: [id])
+  type                String
+  qty                 Float
+  entry_date          DateTime       @default(now())
+  remarks             String?
+  createdAt           DateTime       @default(now())
+}
+
+// V3 Materials Master
+model Material {
+  id                       String                    @id @default(uuid())
+  name                     String
+  uom                      String
+  available_stock          Float                     @default(0)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  MaterialRequirementItems MaterialRequirementItem[]
+  PurchaseRFQItems         PurchaseRFQItem[]
+  PurchaseOrderItems       PurchaseOrderItem[]
+}
+
+model MaterialRequirement {
+  id             String                    @id @default(uuid())
+  mr_number      String                    @unique
+  sales_order_id String
+  sales_order    SalesOrder                @relation(fields: [sales_order_id], references: [id])
+  required_date  DateTime?
+  status         String                    @default("Draft")
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  items          MaterialRequirementItem[]
+  PurchaseRFQs   PurchaseRFQ[]
+}
+
+model MaterialRequirementItem {
+  id                      String              @id @default(uuid())
+  material_requirement_id String
+  material_requirement    MaterialRequirement @relation(fields: [material_requirement_id], references: [id])
+  material_id             String
+  material                Material            @relation(fields: [material_id], references: [id])
+  required_qty            Float
+  available_qty           Float               @default(0)
+  shortage_qty            Float               @default(0)
+  notes                   String?
+  PurchaseRFQItems        PurchaseRFQItem[]
+}
+
+// V4 Procurement Models
+model Supplier {
+  id                  String               @id @default(uuid())
+  name                String
+  contact_person      String?
+  phone               String?
+  email               String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  PurchaseRFQSuppliers PurchaseRFQSupplier[]
+  SupplierQuotes      SupplierQuote[]
+  PurchaseOrders      PurchaseOrder[]
+  JobWorkRFQSuppliers JobWorkRFQSupplier[]
+  JobWorkQuotes       JobWorkQuote[]
+  ServiceOrders       ServiceOrder[]
+  RGPChallans         RGPChallan[]
+}
+
+model PurchaseRFQ {
+  id                      String               @id @default(uuid())
+  rfq_number              String               @unique
+  material_requirement_id String
+  material_requirement    MaterialRequirement  @relation(fields: [material_requirement_id], references: [id])
+  rfq_date                DateTime             @default(now())
+  status                  String               @default("Draft") // Draft, Sent, Quotes Received, Compared, Closed
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  items                   PurchaseRFQItem[]
+  suppliers               PurchaseRFQSupplier[]
+  SupplierQuotes          SupplierQuote[]
+  PurchaseOrders          PurchaseOrder[]
+}
+
+model PurchaseRFQItem {
+  id                          String                  @id @default(uuid())
+  purchase_rfq_id             String
+  purchase_rfq                PurchaseRFQ             @relation(fields: [purchase_rfq_id], references: [id])
+  material_requirement_item_id String
+  material_requirement_item   MaterialRequirementItem @relation(fields: [material_requirement_item_id], references: [id])
+  material_id                 String
+  material                    Material                @relation(fields: [material_id], references: [id])
+  required_qty                Float
+  SupplierQuoteItems          SupplierQuoteItem[]
+  PurchaseOrderItems          PurchaseOrderItem[]
+}
+
+model PurchaseRFQSupplier {
+  id              String      @id @default(uuid())
+  purchase_rfq_id String
+  purchase_rfq    PurchaseRFQ @relation(fields: [purchase_rfq_id], references: [id])
+  supplier_id     String
+  supplier        Supplier    @relation(fields: [supplier_id], references: [id])
+}
+
+model SupplierQuote {
+  id              String              @id @default(uuid())
+  purchase_rfq_id String
+  purchase_rfq    PurchaseRFQ         @relation(fields: [purchase_rfq_id], references: [id])
+  supplier_id     String
+  supplier        Supplier            @relation(fields: [supplier_id], references: [id])
+  quote_date      DateTime            @default(now())
+  createdAt       DateTime            @default(now())
+  items           SupplierQuoteItem[]
+}
+
+model SupplierQuoteItem {
+  id                   String          @id @default(uuid())
+  supplier_quote_id    String
+  supplier_quote       SupplierQuote   @relation(fields: [supplier_quote_id], references: [id])
+  purchase_rfq_item_id String
+  purchase_rfq_item    PurchaseRFQItem @relation(fields: [purchase_rfq_item_id], references: [id])
+  rate                 Float
+  lead_time_days       Int?
+  amount               Float
+  is_selected          Boolean         @default(false)
+  PurchaseOrderItems   PurchaseOrderItem[]
+}
+
+model PurchaseOrder {
+  id               String              @id @default(uuid())
+  po_number        String              @unique
+  purchase_rfq_id  String?
+  purchase_rfq     PurchaseRFQ?        @relation(fields: [purchase_rfq_id], references: [id])
+  supplier_id      String
+  supplier         Supplier            @relation(fields: [supplier_id], references: [id])
+  po_date          DateTime            @default(now())
+  status           String              @default("Issued") // Issued, Partially Received, Closed, Cancelled
+  total_amount     Float               @default(0)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  lines            PurchaseOrderItem[]
+  GRNs             GRN[]
+}
+
+model PurchaseOrderItem {
+  id                     String            @id @default(uuid())
+  purchase_order_id      String
+  purchase_order         PurchaseOrder     @relation(fields: [purchase_order_id], references: [id])
+  material_id            String
+  material               Material          @relation(fields: [material_id], references: [id])
+  supplier_quote_item_id String
+  supplier_quote_item    SupplierQuoteItem @relation(fields: [supplier_quote_item_id], references: [id])
+  purchase_rfq_item_id   String
+  purchase_rfq_item      PurchaseRFQItem   @relation(fields: [purchase_rfq_item_id], references: [id])
+  ordered_qty            Float
+  rate                   Float
+  amount                 Float
+  received_qty           Float             @default(0)
+  pending_qty            Float
+  GRNItems               GRNItem[]
+}
+
+model GRN {
+  id                  String        @id @default(uuid())
+  grn_number          String        @unique
+  purchase_order_id   String
+  purchase_order      PurchaseOrder @relation(fields: [purchase_order_id], references: [id])
+  grn_date            DateTime      @default(now())
+  supplier_challan_ref String?
+  createdAt           DateTime      @default(now())
+  items               GRNItem[]
+}
+
+model GRNItem {
+  id                      String            @id @default(uuid())
+  grn_id                  String
+  grn                     GRN               @relation(fields: [grn_id], references: [id])
+  purchase_order_item_id  String
+  purchase_order_item     PurchaseOrderItem @relation(fields: [purchase_order_item_id], references: [id])
+  received_qty            Float
+  accepted_qty            Float
+  rejected_qty            Float
+  remarks                 String?
+}
+
+// V5 Planning & Execution Models
+
+model Planning {
+  id                  String          @id @default(uuid())
+  planning_number     String          @unique
+  sales_order_item_id String
+  sales_order_item    SalesOrderItem  @relation(fields: [sales_order_item_id], references: [id])
+  inhouse_qty         Float           @default(0)
+  outsource_qty       Float           @default(0)
+  target_start_date   DateTime?
+  target_end_date     DateTime?
+  status              String          @default("Draft") // Draft, Released, In Progress, Completed, Cancelled
+  notes               String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  JobCards            JobCard[]
+  JobWorkRFQs         JobWorkRFQ[]
+}
+
+model JobCard {
+  id                  String            @id @default(uuid())
+  job_card_number     String            @unique
+  planning_id         String
+  planning            Planning          @relation(fields: [planning_id], references: [id])
+  planned_qty         Float
+  machine             String?
+  process             String?
+  operator            String?
+  target_start_date   DateTime?
+  target_end_date     DateTime?
+  status              String            @default("Draft") // Draft, Released, In Progress, Completed, Closed
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  productionEntries   ProductionEntry[]
+}
+
+model ProductionEntry {
+  id            String    @id @default(uuid())
+  job_card_id   String
+  job_card      JobCard   @relation(fields: [job_card_id], references: [id])
+  produced_qty  Float
+  rejected_qty  Float     @default(0)
+  entry_date    DateTime  @default(now())
+  remarks       String?
+  createdAt     DateTime  @default(now())
+}
+
+model JobWorkRFQ {
+  id                      String                @id @default(uuid())
+  rfq_number              String                @unique
+  planning_id             String
+  planning                Planning              @relation(fields: [planning_id], references: [id])
+  process                 String
+  qty                     Float
+  required_date           DateTime?
+  material_responsibility String                @default("Company") // Company or Vendor
+  status                  String                @default("Draft") // Draft, Sent, Quotes Received, Compared, Closed
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  suppliers               JobWorkRFQSupplier[]
+  quotes                  JobWorkQuote[]
+  ServiceOrders           ServiceOrder[]
+}
+
+model JobWorkRFQSupplier {
+  id              String      @id @default(uuid())
+  jobwork_rfq_id  String
+  jobwork_rfq     JobWorkRFQ  @relation(fields: [jobwork_rfq_id], references: [id])
+  supplier_id     String
+  supplier        Supplier    @relation(fields: [supplier_id], references: [id])
+}
+
+model JobWorkQuote {
+  id              String         @id @default(uuid())
+  jobwork_rfq_id  String
+  jobwork_rfq     JobWorkRFQ     @relation(fields: [jobwork_rfq_id], references: [id])
+  supplier_id     String
+  supplier        Supplier       @relation(fields: [supplier_id], references: [id])
+  rate            Float
+  lead_time_days  Int?
+  amount          Float
+  is_selected     Boolean        @default(false)
+  quote_date      DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  ServiceOrders   ServiceOrder[]
+}
+
+model ServiceOrder {
+  id                   String        @id @default(uuid())
+  service_order_number String        @unique
+  jobwork_rfq_id       String?
+  jobwork_rfq          JobWorkRFQ?   @relation(fields: [jobwork_rfq_id], references: [id])
+  jobwork_quote_id     String?
+  jobwork_quote        JobWorkQuote? @relation(fields: [jobwork_quote_id], references: [id])
+  supplier_id          String
+  supplier             Supplier      @relation(fields: [supplier_id], references: [id])
+  process              String
+  ordered_qty          Float
+  rate                 Float
+  amount               Float
+  expected_date        DateTime?
+  status               String        @default("Issued") // Issued, In Progress, Partially Received, Completed, Closed
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  rgpChallans          RGPChallan[]
+}
+
+model RGPChallan {
+  id                   String        @id @default(uuid())
+  rgp_number           String        @unique
+  service_order_id     String
+  service_order        ServiceOrder  @relation(fields: [service_order_id], references: [id])
+  vendor_id            String
+  vendor               Supplier      @relation(fields: [vendor_id], references: [id])
+  sent_qty             Float
+  challan_date         DateTime      @default(now())
+  expected_return_date DateTime?
+  status               String        @default("Dispatched") // Dispatched, Partially Returned, Closed
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  returns              RGPReturn[]
+}
+
+model RGPReturn {
+  id             String      @id @default(uuid())
+  rgp_challan_id String
+  rgp_challan    RGPChallan  @relation(fields: [rgp_challan_id], references: [id])
+  received_qty   Float
+  accepted_qty   Float
+  rejected_qty   Float       @default(0)
+  rework_qty     Float       @default(0)
+  return_date    DateTime    @default(now())
+  challan_ref    String?
+  remarks        String?
+  createdAt      DateTime    @default(now())
+}
+
+// V6 QC/Inspection & Dispatch Models
+
+model QCInspection {
+  id                  String             @id @default(uuid())
+  qc_number           String             @unique
+  source_type         String             // "Job Card", "RGP Return"
+  source_id           String             // polymorphic ref to JobCard.id or RGPReturn.id
+  sales_order_item_id String
+  sales_order_item    SalesOrderItem     @relation(fields: [sales_order_item_id], references: [id])
+  inspection_date     DateTime           @default(now())
+  status              String             @default("Pending") // "Pending", "In Inspection", "Completed"
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  items               QCInspectionItem[]
+}
+
+model QCInspectionItem {
+  id               String       @id @default(uuid())
+  qc_inspection_id String
+  qc_inspection    QCInspection @relation(fields: [qc_inspection_id], references: [id])
+  inspected_qty    Float
+  accepted_qty     Float        @default(0)
+  rejected_qty     Float        @default(0)
+  rework_qty       Float        @default(0)
+  remarks          String?
+  actions          QCAction[]
+}
+
+model QCAction {
+  id                    String           @id @default(uuid())
+  qc_inspection_item_id String
+  qc_inspection_item    QCInspectionItem @relation(fields: [qc_inspection_item_id], references: [id])
+  action_type           String           // "Rework", "Scrap", "Return to Vendor"
+  owner                 String
+  due_date              DateTime?
+  status                String           @default("Open") // "Open", "Closed"
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+}
+
+model Dispatch {
+  id                String         @id @default(uuid())
+  dispatch_number   String         @unique
+  sales_order_id    String
+  sales_order       SalesOrder     @relation(fields: [sales_order_id], references: [id])
+  dispatch_date     DateTime       @default(now())
+  transporter       String?
+  vehicle_number    String?
+  lr_number         String?
+  package_count     Int?
+  weight            Float?
+  invoice_reference String?
+  createdAt         DateTime       @default(now())
+  items             DispatchItem[]
+  Feedbacks         Feedback[]
+}
+
+model DispatchItem {
+  id                  String         @id @default(uuid())
+  dispatch_id         String
+  dispatch            Dispatch       @relation(fields: [dispatch_id], references: [id])
+  sales_order_item_id String
+  sales_order_item    SalesOrderItem @relation(fields: [sales_order_item_id], references: [id])
+  dispatched_qty      Float
+}
+
+// V7 Feedback, Admin/RBAC, Audit Log Models
+
+model Feedback {
+  id              String           @id @default(uuid())
+  feedback_number String           @unique
+  dispatch_id     String
+  dispatch        Dispatch         @relation(fields: [dispatch_id], references: [id])
+  customer_id     String
+  customer        Customer         @relation(fields: [customer_id], references: [id])
+  requested_at    DateTime         @default(now())
+  received_at     DateTime?
+  rating          Int?
+  comments        String?
+  status          String           @default("Requested") // "Requested", "Received", "Action Open", "Resolved", "Closed"
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  actions         FeedbackAction[]
+}
+
+model FeedbackAction {
+  id           String    @id @default(uuid())
+  feedback_id  String
+  feedback     Feedback  @relation(fields: [feedback_id], references: [id])
+  owner        String
+  due_date     DateTime?
+  action_notes String?
+  status       String    @default("Open") // "Open", "Resolved"
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model User {
+  id            String     @id @default(uuid())
+  name          String
+  email         String     @unique
+  password_hash String
+  role_id       String
+  role          Role       @relation(fields: [role_id], references: [id])
+  is_active     Boolean    @default(true)
+  last_login_at DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  auditLogs     AuditLog[]
+}
+
+model Role {
+  id             String           @id @default(uuid())
+  name           String           @unique
+  is_system_role Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  permissions    RolePermission[]
+  users          User[]
+}
+
+model RolePermission {
+  id         String   @id @default(uuid())
+  role_id    String
+  role       Role     @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  module     String
+  can_view   Boolean  @default(false)
+  can_create Boolean  @default(false)
+  can_edit   Boolean  @default(false)
+  can_approve Boolean @default(false)
+  can_delete Boolean  @default(false)
+  can_export Boolean  @default(false)
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  user_id    String?
+  user       User?    @relation(fields: [user_id], references: [id])
+  action     String
+  module     String
+  entity_id  String
+  old_values String?  // JSON string
+  new_values String?  // JSON string
+  createdAt  DateTime @default(now())
+}
+
+
+
